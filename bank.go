@@ -24,7 +24,7 @@ const (
 // Banker defines the bank barcode generation
 type Banker interface {
 	// Barcode returns the BarcodeNumber
-	Barcode(Document) (*BarcodeNumber, error)
+	Barcode(*Document) (*BarcodeNumber, error)
 }
 
 // Bank is the basic struct that defines required fileds that all the banks are required to have
@@ -39,7 +39,7 @@ type Bank struct {
 
 // BankSlipPrinter defines an interface to print a HTML template using a document
 type BankSlipPrinter interface {
-	Layout(http.ResponseWriter, Document)
+	Layout(http.ResponseWriter, *Document)
 }
 
 // BarcodeNumber defines a barcode number type,
@@ -57,23 +57,6 @@ type BarcodeNumber struct {
 	BankNumbers string
 	// Verification digit fomr the barcode
 	Dv int
-}
-
-// Verify checks if the DV number was generated correctly
-func (n *BarcodeNumber) Verify() error {
-	s := n.String()
-
-	if len(s) < barcodeNumberMinSize {
-		return errors.New("there are missing values in Bank and Document structures")
-	}
-
-	if len(s) > barcodeNumberMaxSize {
-		return errors.New("there are remaining values in Bank and Document structures")
-	}
-
-	n.Dv = Module11(s)
-
-	return nil
 }
 
 // Digitable mount the barcode digitable number,
@@ -100,8 +83,16 @@ func (n *BarcodeNumber) Verify() error {
 // V = Value
 //
 // return AAABC.CCCCX DDDDD.DDDDDX EEEEE.EEEEEX X UUUUVVVVVVVVVV
-func (n *BarcodeNumber) Digitable() string {
+func (n *BarcodeNumber) Digitable() (string, error) {
 	s := n.String()
+
+	if len(s) < barcodeNumberMinSize {
+		return "", errors.New("there are missing values in Bank and Document structures")
+	}
+
+	if len(s) > barcodeNumberMaxSize {
+		return "", errors.New("there are remaining values in Bank and Document structures")
+	}
 
 	// Field 1
 	var f1 = fmt.Sprintf("%0"+strconv.Itoa(bankMinSize)+"d", n.BankID)
@@ -125,12 +116,20 @@ func (n *BarcodeNumber) Digitable() string {
 	f5 += fmt.Sprintf("%0"+strconv.Itoa(valueMinSize)+"d", n.Value)
 
 	// All fields together
-	return fmt.Sprintf("%s %s %s %s %s", f1, f2, f3, f4, f5)
+	return fmt.Sprintf("%s %s %s %s %s", f1, f2, f3, f4, f5), nil
 }
 
-// toString takes BarcodeNumber, and converts to a string,
+// String takes BarcodeNumber, and converts to a string,
 // including pad numbers and left zeros
 func (n *BarcodeNumber) String() string {
+	lineWithoutDV := bytes.NewBufferString(fmt.Sprintf("%0"+strconv.Itoa(bankMinSize)+"d", n.BankID))
+	lineWithoutDV.WriteString(strconv.Itoa(n.CurrencyID))
+	lineWithoutDV.WriteString(strconv.Itoa(n.DateDueFactor))
+	lineWithoutDV.WriteString(fmt.Sprintf("%0"+strconv.Itoa(valueMinSize)+"d", n.Value))
+	lineWithoutDV.WriteString(n.BankNumbers)
+
+	n.Dv = Module11(lineWithoutDV.String())
+
 	b := bytes.NewBufferString(fmt.Sprintf("%0"+strconv.Itoa(bankMinSize)+"d", n.BankID))
 	b.WriteString(strconv.Itoa(n.CurrencyID))
 	b.WriteString(strconv.Itoa(n.Dv))
