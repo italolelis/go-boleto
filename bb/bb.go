@@ -23,15 +23,15 @@ var (
 // Source: (http://www.bb.com.br/docs/pub/emp/mpe/espeboletobb.pdf)
 type BB struct {
 	boleto.Bank
+	Company  *boleto.Company
 	Agency   int
 	Account  int
 	Convenio int
 	Carteira int
-	Company  boleto.Company
 }
 
 // New creates a new instance of BB
-func New() *BB {
+func New(agency int, account int, convenio int, carteira int, company *boleto.Company) *BB {
 	return &BB{
 		Bank: boleto.Bank{
 			ID:             001,
@@ -41,11 +41,16 @@ func New() *BB {
 			AgencyMaxSize:  4,
 			AccountMaxSize: 8,
 		},
+		Agency:   agency,
+		Account:  account,
+		Convenio: convenio,
+		Carteira: carteira,
+		Company:  company,
 	}
 }
 
 // Barcode Get the Barcode, creating a BarcodeNumber
-func (b BB) Barcode(d boleto.Document) (*boleto.BarcodeNumber, error) {
+func (b *BB) Barcode(d *boleto.Document) (*boleto.BarcodeNumber, error) {
 	// Complete the BankNumbers digits, by adding convenio rules according to the bank
 	var bn string
 	convenioSize := len(strconv.Itoa(b.Convenio))
@@ -95,18 +100,17 @@ func (b BB) Barcode(d boleto.Document) (*boleto.BarcodeNumber, error) {
 		return nil, ErrInvalidConvenio
 	}
 
+	dueDateFactor, err := boleto.DateDueFactor(d.DateDue)
+	if err != nil {
+		return nil, fmt.Errorf("there was an error calculating the due date factor: %s", err)
+	}
+
 	// Create a new Barcode
-	n := &boleto.BarcodeNumber{
+	return &boleto.BarcodeNumber{
 		BankID:        b.ID,
 		CurrencyID:    b.Currency,
-		DateDueFactor: boleto.DateDueFactor(d.DateDue),
+		DateDueFactor: dueDateFactor,
 		Value:         d.Value,
 		BankNumbers:   fmt.Sprintf("%0"+strconv.Itoa(bankNumbersSize)+"s", bn),
-	}
-
-	if err := n.Verify(); err != nil {
-		return nil, fmt.Errorf("the BB bank slip number could not be generated: %s", err)
-	}
-
-	return n, nil
+	}, nil
 }
