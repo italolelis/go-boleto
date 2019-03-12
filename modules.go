@@ -1,6 +1,7 @@
 package boleto
 
 import (
+	"errors"
 	"strconv"
 	"time"
 )
@@ -16,16 +17,21 @@ const (
 	maxModule11 = 9
 )
 
+var (
+	// ErrNotFutureDueDate is used when the due date is not in the future
+	ErrNotFutureDueDate = errors.New("due date must be in the future")
+)
+
 // DateDueFactor use a DateDue type time.Time to return a int,
 // with is the quantity of days subsequents from 1997-10-07
-func DateDueFactor(dateDue time.Time) int {
+func DateDueFactor(dateDue time.Time) (int, error) {
 	var dateDueFixed = time.Date(1997, 10, 07, 0, 0, 0, 0, time.UTC)
 	dif := dateDue.Sub(dateDueFixed)
 	factor := int(dif.Hours() / 24)
 	if factor <= 0 {
-		panic("Document.DateDue must be in the future")
+		return 0, ErrNotFutureDueDate
 	}
-	return factor
+	return factor, nil
 }
 
 // Module10 takes a number and returns his verifier digit (spect an string
@@ -134,7 +140,6 @@ func Module11(s string) int {
 		if p < minModule11 {
 			p = maxModule11
 		}
-
 	}
 
 	// If the numbers length is higher than 11,
