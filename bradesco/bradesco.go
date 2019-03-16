@@ -35,6 +35,8 @@ func New(agency int, account int, convenio int, carteira int, company *boleto.Co
 	return &Bradesco{
 		Bank: boleto.Bank{
 			ID:             237,
+			Number:         boleto.Module11("237"),
+			Name:           "Bradesco",
 			Aceite:         "N",
 			Currency:       9,
 			CurrencyName:   "R$",
@@ -75,7 +77,7 @@ func (b *Bradesco) Barcode(d *boleto.Document) (*boleto.BarcodeNumber, error) {
 		BankID:        b.ID,
 		CurrencyID:    b.Currency,
 		DateDueFactor: dueDateFactor,
-		Value:         d.Value,
+		Value:         d.Total(),
 		BankNumbers:   fmt.Sprintf("%0"+strconv.Itoa(bankNumbersSize)+"s", bn),
 	}, nil
 }

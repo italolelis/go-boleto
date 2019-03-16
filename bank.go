@@ -30,6 +30,8 @@ type Banker interface {
 // Bank is the basic struct that defines required fileds that all the banks are required to have
 type Bank struct {
 	ID             int
+	Number         int
+	Name           string
 	Aceite         string
 	Currency       int
 	CurrencyName   string
