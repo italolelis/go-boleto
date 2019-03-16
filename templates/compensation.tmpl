@@ -1,0 +1,155 @@
+{{define "compensation"}}
+<div id="ficha_compensacao">
+    <!--  cabecalho  -->
+    <div class="cabecalho">
+        <div class="banco_logo ">
+            <img src="images/bradesco.png" >
+        </div>
+        <div class="banco_codigo ">{{ .Bank.ID }} - {{ .Bank.Number }}</div>
+        <div class="linha_digitavel last">{{ .DigitableNumber }}</div>
+    </div>
+
+    <div id="colunaprincipal" class="">
+        <!--  linha1  -->
+        <!--local de pagamento-->
+        <div class="local_pagamento item">
+            <label>Local de Pagamento</label>
+            Blah
+        </div>
+
+        <!--  linha2  -->
+        <!--Cedente-->
+        <div class="cedente item">
+            <label>Cedente </label>
+            {{.Document.Payer.Name}}
+        </div>
+
+        <!--  linha3  -->
+        <div class="linha">
+            <!--data emissao-->
+            <div class="data_doc item">
+                <label>Data do documento</label>
+               {{ .Document.Date | formatAsDate }}
+            </div>
+            <!--numdocumento-->
+            <div class="num_doc item">
+                <label>Número do documento</label>
+                {{ .Document.ID }}
+            </div>
+            <!--especiedocumento-->
+            <div class="espec_doc item">
+                <label>Espécie Doc.</label>
+                {{ .Document.FebrabanType | upper }}
+            </div>
+            <!--aceite-->
+            <div class="aceite item">
+                <label>Aceite</label>
+                {{ .Bank.Aceite }}
+            </div>
+            <!--data processamento-->
+            <div class="dt_proc item">
+                <label>Data proc</label>
+                {{ now }}
+            </div>
+        </div>
+
+        <!--  linha4  -->
+        <div class="linha">
+            <!--uso do banco-->
+            <div class="uso_banco item">
+                <label>Uso do Banco</label>
+            </div>
+            <!--carteira-->
+            <div class="carteira item">
+                <label>Carteira</label>
+                {{ .Bank.Carteira }}
+            </div>
+            <!--especie moeda-->
+            <div class="moeda item">
+                <label>Moeda</label>
+                {{ .Bank.CurrencyName }}
+            </div>
+            <!--quantidade-->
+            <div class="qtd item">
+                <label>Quantidade</label>
+            </div>
+            <!--valor-->
+            <div class="valor item">
+                <label>(x) Valor</label>
+            </div>
+        </div>
+
+        <!--  instrucoes/mensagens  -->
+        <div class="mensagens ">
+            <label>Instruções (Texto de responsabilidade do cedente)</label>
+            {{- range .Document.Instructions }}
+                {{.}}<br>
+            {{- end}}
+        </div>
+
+    </div>
+    <!--Coluna direita-->
+    <div id="colunadireita" class="">
+        <div class="">
+            <label>Vencimento</label>
+            {{ .Document.DateDue | formatAsDate }}
+        </div>
+        <div class="">
+            <label>Agência / Código cedente </label>
+            {{ .Bank.Agency }} / {{ .Bank.Account }}
+        </div>
+        <div class="">
+            <label>Nosso número</label>
+            {{ .Document.OurNumber }}
+        </div>
+        <div class="">
+            <label>(=) Valor do documento</label>
+            {{ .Document.Value | formatNumber }}
+        </div>
+        <div class="">
+            <label>(-) Desconto/Abatimento</label>
+            {{ .Document.ValueDiscount | formatNumber }}
+        </div>
+        <div class="">
+            <label>(-) Outras deduções</label>
+        </div>
+        <div class="">
+            <label>(+) Mora/Multa</label>
+            {{ .Document.ValueForfeit | formatNumber }}
+        </div>
+        <div class="">
+            <label>(+) Outros Acréscimos</label>
+        </div>
+        <div class="">
+            <label>(=) Valor cobrado</label>
+            {{ .Document.Total | formatNumber }}
+        </div>
+    </div>
+
+    <!--  sacado  -->
+    <div id="sacado" class="">
+        <div class="">
+            <label>Sacado</label>
+            {{ .Bank.Company.Name }}
+            <br>
+            {{ .Bank.Company.Document }}
+            <br>
+            {{ .Bank.Company.Address }}
+        </div>
+    </div>
+
+    <!--  codigo_barras  -->
+    <div id="codigo_barras" class="">
+        <span>Ficha de Compensação</span>
+        <label>Autenticação Mecânica</label>
+        barcode
+    </div>
+
+    <!--Linha pontilhada para corte-->
+    <div class="linha_corte">
+        <label>Corte na linha pontilhada</label>
+    </div>
+
+    <!--Encerra ficha de compensação-->    
+</div>
+{{end}}

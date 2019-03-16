@@ -1,0 +1,15 @@
+{{define "main"}}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Boleto {{ .Bank.Name }}</title>
+        <meta charset="UTF-8">
+        <link href="css/default.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+    <div id="container">
+        {{template "compensation" .}}
+    </div>
+</body>
+</html>
+{{end}}
