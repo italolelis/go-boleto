@@ -111,3 +111,8 @@ func (d *Document) To(p *Payer) error {
 
 	return nil
 }
+
+// Total calculates the total of the boleto
+func (d *Document) Total() uint {
+	return (d.Value + d.ValueForfeit) - d.ValueDiscount
+}
